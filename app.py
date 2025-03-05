@@ -2,9 +2,14 @@ import sqlite3
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import re
+import os
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 regex = re.compile(r'[^\w\s]|\.')
 hasher = PasswordHasher()
+userMasterKey = b""
 
 connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
@@ -17,6 +22,23 @@ def startup():
       logIn()
    if start == "2":
       createUser()
+   
+def genSalt():
+   salt = os.urandom(16)
+   return salt
+
+def kdfMaster(password,salt):
+   kdf = Scrypt(
+    salt=salt,
+    length=32,
+    n=2**14,
+    r=8,
+    p=1,
+   )
+   masterKey = kdf.derive(password.encode())
+   return masterKey
+   
+
 
 def createUser():
    print("Create username and password")
@@ -29,8 +51,13 @@ def createUser():
    password = input ("Enter password: ")
    passwordCheck(password)
    
-   connCursor.execute("INSERT INTO users (userName, pass_hash) VALUES (?, ?)", (username, hashPassword(password)))
+   connCursor.execute("INSERT INTO users (userName, pass_hash, salt) VALUES (?, ?, ?)", (username, hashPassword(password), genSalt()))
    connection.commit()
+   
+   
+   connCursor.execute("SELECT salt FROM users WHERE userName = ?", (username,))
+   newUserSalt = connCursor.fetchone()
+   kdfMaster(password, newUserSalt[0])
    print("User created successfully!")
    userPortal(username)
    
@@ -46,6 +73,11 @@ def logIn():
          try:
             if(hasher.verify(currentUser[0],password)):
                print("Welcome back")
+               connCursor.execute("SELECT salt FROM users WHERE userName = ?", (username,))
+               currUserSalt = connCursor.fetchone()
+               userMasterKey = kdfMaster(password, currUserSalt[0])
+               print(userMasterKey)
+               print(currUserSalt)
                userPortal(username)
                break
          except VerifyMismatchError:
@@ -64,11 +96,10 @@ def passwordCheck(pswd):
 
 def userPortal(user):
    connCursor.execute("SELECT passwordText FROM usersPasswords WHERE user = ?", (user,))
-   if connCursor.fetchone():
-      print(connCursor.fetchall())
-   else:
-      print("No password in database! Add password into database")
-      addPassword(user)
+   passwords = connCursor.fetchall()
+   for password in passwords:
+      print(password)
+   addPassword(user)
 
 def hashPassword(password):
    pswdHashed = hasher.hash(password)
