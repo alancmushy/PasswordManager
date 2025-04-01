@@ -3,13 +3,14 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import re
 import os
+from dotenv import load_dotenv
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.hazmat.primitives.keywrap import aes_key_wrap, aes_key_unwrap
 
 regex = re.compile(r'[^\w\s]|\.')
 hasher = PasswordHasher()
-userMasterKey = b""
 
 connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
@@ -22,22 +23,34 @@ def startup():
       logIn()
    if start == "2":
       createUser()
-   
+
+def userSelection(user):
+   print("type 1 if you want to view passwords or 2 if you want to add a password or 3 to log out")
+   select = input("Type number here: ")
+   if select == "1":
+      userPortal(user)
+   if select == "2":
+      addPassword(user)
+   if select == "3":
+      startup()
+
 def genSalt():
    salt = os.urandom(16)
    return salt
 
-def kdfMaster(password,salt):
+
+def kdfMaster(password,user):
    kdf = Scrypt(
-    salt=salt,
-    length=32,
+    salt=genSalt(),
+    length=24,
     n=2**14,
     r=8,
     p=1,
    )
-   masterKey = kdf.derive(password.encode())
-   return masterKey
-   
+   mKey = kdf.derive(password.encode())
+   with open(".env", "a") as f:
+      f.write(f"{user}={mKey.hex()}\n")
+
 
 
 def createUser():
@@ -51,13 +64,9 @@ def createUser():
    password = input ("Enter password: ")
    passwordCheck(password)
    
-   connCursor.execute("INSERT INTO users (userName, pass_hash, salt) VALUES (?, ?, ?)", (username, hashPassword(password), genSalt()))
+   connCursor.execute("INSERT INTO users (userName, pass_hash) VALUES (?, ?)", (username, hashPassword(password)))
    connection.commit()
-   
-   
-   connCursor.execute("SELECT salt FROM users WHERE userName = ?", (username,))
-   newUserSalt = connCursor.fetchone()
-   kdfMaster(password, newUserSalt[0])
+   kdfMaster(password,username)
    print("User created successfully!")
    userPortal(username)
    
@@ -73,12 +82,7 @@ def logIn():
          try:
             if(hasher.verify(currentUser[0],password)):
                print("Welcome back")
-               connCursor.execute("SELECT salt FROM users WHERE userName = ?", (username,))
-               currUserSalt = connCursor.fetchone()
-               userMasterKey = kdfMaster(password, currUserSalt[0])
-               print(userMasterKey)
-               print(currUserSalt)
-               userPortal(username)
+               userSelection(username)
                break
          except VerifyMismatchError:
             print("Password for user is incorrect")
@@ -88,29 +92,77 @@ def logIn():
 def passwordCheck(pswd):
    while not (any(i.isdigit() for i in pswd) and regex.search(pswd)):
       print("Password not strong enough")
-      print(f"DEBUG: Contains digit? {any(i.isdigit() for i in pswd)}")  
-      print(f"DEBUG: Contains special char? {regex.search(pswd) is not None}")
       pswd = input ("Enter password: ")
       passwordCheck(pswd)
    return pswd
-
-def userPortal(user):
-   connCursor.execute("SELECT passwordText FROM usersPasswords WHERE user = ?", (user,))
-   passwords = connCursor.fetchall()
-   for password in passwords:
-      print(password)
-   addPassword(user)
 
 def hashPassword(password):
    pswdHashed = hasher.hash(password)
    return pswdHashed
 
-def addPassword(user):
-   passwordUsername = input ("Enter password username: ")
-   password = input ("Enter password: ")
-   website = input ("Enter password website: ")
-   connCursor.execute("INSERT INTO usersPasswords (user, passwordWebsite, passwordText, passwordUsername) VALUES (? ,? , ?, ?)", (user, website, password, passwordUsername))
-   connection.commit()
+def genEncryptionKey():
+   return get_random_bytes(16)
 
+
+def keyWrapping(user,eKey):
+   load_dotenv()
+   mKeydata = os.getenv(user)
+   mKey = bytes.fromhex(mKeydata)
+   key = aes_key_wrap(mKey,eKey)
+   return key
+
+def keyUnwrapping(user,wKey):
+   load_dotenv()
+   mKeydata = os.getenv(user)
+   mKey = bytes.fromhex(mKeydata)
+   key = aes_key_unwrap(mKey,wKey)
+   return key
+
+def encryptPassword(password,key,header):
+   header = header.encode()
+   password = password.encode()
+   cipher = AES.new(key, AES.MODE_GCM)
+   cipher.update(header)
+   ciphertext, tag = cipher.encrypt_and_digest(password)
+   encryption = cipher.nonce + b"EUREKA" + ciphertext + b"EUREKA" + tag
+   print(encryption)
+   return encryption
+   
+def decryptPassword(nonce, ciphertext, tag, key,header):
+   header = header.encode()
+   cipher = AES.new(key, AES.MODE_GCM, nonce)
+   cipher.update(header)
+   plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+   plaintext = plaintext.decode()
+   return plaintext
+
+def addPassword(user):
+   passwordUser = input ("Enter password username: ")
+   passwordPlaintext = input ("Enter password: ")
+   website = input ("Enter password website: ")
+   key = genEncryptionKey()
+   ePassword = encryptPassword(passwordPlaintext,key,website)
+   wKey = keyWrapping(user, key)
+   connCursor.execute("INSERT INTO usersPasswords (user, passwordUsername, passwordWebsite, passwordData, wrappedKey) VALUES (? ,? , ?, ?, ?)", (user, passwordUser, website, ePassword, wKey))
+   print(user + "'s " + website + " password successfully added to database")
+   connection.commit()
+   userSelection(user)
+
+def userPortal(user):
+   connCursor.execute("SELECT passwordData FROM usersPasswords WHERE user = ?", (user,))
+   passwords = connCursor.fetchall()
+   print(user + "'s Passwords:")
+   for password in passwords:
+      connCursor.execute("SELECT passwordUsername, passwordWebsite, wrappedKey FROM usersPasswords WHERE passwordData = ?", (password[0],))
+      result = connCursor.fetchone()
+      print(result)
+      username = result[0]
+      website = result[1]
+      wKey = result[2]
+      key = keyUnwrapping(user,wKey)
+      password_data = password[0].split(b'EUREKA')
+      plainPassword = decryptPassword(password_data[0],password_data[1],password_data[2],key,website)
+      print("Website: " + website + ", Username: " + username + ", Password: " + plainPassword)
+   userSelection(user)
 
 startup()
