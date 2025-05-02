@@ -6,6 +6,6 @@ with open('passProtect.sql') as f:
     connection.executescript(f.read())
 
 cur = connection.cursor()
-print("Database successfully created")
+#print("Database successfully created")
 connection.commit()
 connection.close()

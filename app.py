@@ -10,13 +10,15 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.keywrap import aes_key_wrap, aes_key_unwrap
 import initDatabase 
 
-regex = re.compile(r'[^\w\s]|\.')
-hasher = PasswordHasher()
+
+
 
 connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
 
-class app():
+class App():
+   
+
    def startup(self):
       print("type 1 if you want to login or 2 if you want to create a user")
       start = input("Type number here: ")
@@ -72,7 +74,9 @@ class app():
       self.kdfMaster(password,username)
       print("User created successfully!")
       self.userPortal(username)
-      
+   
+   hasher = PasswordHasher()
+
    def logIn(self):
       print("Enter Username and Password")
 
@@ -83,7 +87,7 @@ class app():
          currentUser = connCursor.fetchone()
          if currentUser:
             try:
-               if(hasher.verify(currentUser[0],password)):
+               if(self.hasher.verify(currentUser[0],password)):
                   print("Welcome back")
                   self.userSelection(username)
                   break
@@ -93,35 +97,42 @@ class app():
             print("User does not exist try again")
    
    def passwordCheck(self,pswd):
-      while not (any(i.isdigit() for i in pswd) and regex.search(pswd)):
-         print("Password not strong enough")
+      regex = re.compile(r'[^\w\s]|\.')
+
+      if pswd is None:
+        pswd = input("No password entered, please enter password: ")
+
+      while not (any(i.isdigit() for i in pswd) and regex.search(pswd) and len(pswd)>=7 and ' ' not in pswd):
+         print(pswd + " password not strong enough")
          pswd = input ("Enter password: ")
-         self.passwordCheck(pswd)
       return pswd
 
-   @staticmethod
-   def hashPassword(password):
-      pswdHashed = hasher.hash(password)
+ 
+   def hashPassword(self,password):
+      pswdHashed = self.hasher.hash(password)
       return pswdHashed
-
+   
+   @staticmethod
+   def getMKey(user):
+      load_dotenv()
+      mKeydata = os.getenv(user)
+      mKey = bytes.fromhex(mKeydata)
+      return mKey
+   
    @staticmethod
    def genEncryptionKey():
       return get_random_bytes(16)
 
-   @staticmethod
-   def keyWrapping(user,eKey):
-      load_dotenv()
-      mKeydata = os.getenv(user)
-      mKey = bytes.fromhex(mKeydata)
-      key = aes_key_wrap(mKey,eKey)
+
+   def keyWrapping(self,user,eKey):
+      master = self.getMKey(user)
+      key = aes_key_wrap(master,eKey)
       return key
 
-   @staticmethod
-   def keyUnwrapping(user,wKey):
-      load_dotenv()
-      mKeydata = os.getenv(user)
-      mKey = bytes.fromhex(mKeydata)
-      key = aes_key_unwrap(mKey,wKey)
+
+   def keyUnwrapping(self,user,wKey):
+      master = self.getMKey(user)
+      key = aes_key_unwrap(master,wKey)
       return key
 
    @staticmethod
@@ -175,5 +186,5 @@ class app():
 
 if __name__ == "__main__":
    initDatabase
-   myApp = app()
+   myApp = App()
    myApp.startup()
