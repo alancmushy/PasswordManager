@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from app import App
+from app.logic import App
 
 class TestApp(unittest.TestCase):
    def test_password_first(self):
