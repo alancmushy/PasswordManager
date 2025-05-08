@@ -60,7 +60,7 @@ class App():
       
       self.kdfMaster(createdUser.password,createdUser.username)
  
-      self.userPortal(createdUser)
+      self.userPortal(createdUser.username)
 
       return createdUser
    

@@ -3,6 +3,8 @@ from app.app_router import router
 from app.initDatabase import startup
 from contextlib import asynccontextmanager
 
+app = FastAPI()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
    startup()

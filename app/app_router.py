@@ -5,7 +5,7 @@ from app.logic import *
 
 router = APIRouter()
 logic = App()
-app = FastAPI()
+
 
 @router.get("/")
 def root():
