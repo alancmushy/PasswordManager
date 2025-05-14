@@ -25,7 +25,7 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault()
   if(pswdInput == doubleCheckPswd){
       registerUser(nameInput, pswdInput);
-      navigate(`/${nameInput}/view`)
+      navigate(`/${nameInput}/append`)
   }else{
       document.getElementById("pswdCheckText")!.innerHTML = "Passwords do NOT match! Try again";
   }

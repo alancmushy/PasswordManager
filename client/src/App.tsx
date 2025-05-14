@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css'
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import RegUser from './pages/register'
-
+import LogIn from './pages/logIn'
 
 const Home: React.FC = () =>{
    const navigate = useNavigate()
@@ -25,9 +25,9 @@ const App: React.FC = () => {
       <Routes>
          <Route path="/" element={<Home />} /> 
          <Route path = "/register" element = {<RegUser />}  />
-         <Route path = "/login"></Route>
+         <Route path = "/login" element = {<LogIn />}  />
          <Route path = "/:username/view"></Route>
-         <Route path = "/:username/addPswd"></Route>
+         <Route path = "/:username/append"></Route>
       </Routes>
    </BrowserRouter>
 
