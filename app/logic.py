@@ -12,6 +12,7 @@ from fastapi import *
 from pydantic import BaseModel
 
 
+
 connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
 
@@ -26,6 +27,7 @@ class dbData(BaseModel):
    
 
 class App():
+
    hasher = PasswordHasher()
 
    @staticmethod
@@ -61,6 +63,7 @@ class App():
       self.kdfMaster(createdUser.password,createdUser.username)
  
       self.userPortal(createdUser.username)
+      
 
       return createdUser
    
@@ -102,7 +105,9 @@ class App():
 
    @staticmethod
    def getMKey(username:str):
-      load_dotenv()
+      print(os.path.abspath('.env'))
+      load_dotenv(os.path.abspath('.env'))
+      print(username + " hex= ", os.getenv(username))
       mKeydata = os.getenv(username)
       mKey = bytes.fromhex(mKeydata)
       return mKey

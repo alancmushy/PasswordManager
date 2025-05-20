@@ -3,8 +3,13 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  
 }
 
+
+p{
+  font-family: Consolas, 'Courier New', monospace;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -33,6 +38,9 @@
   }
 }
 
+#password-data{
+  background-color:rgba(240, 255, 255, 0.274)
+}
 .card {
   padding: 2em;
 }
