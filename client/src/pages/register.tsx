@@ -39,16 +39,19 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   return (
    
       <div>
+         <head>
+            <title>Register - ARCH</title>
+         </head>
          <div>
             <h1>Register</h1>
-            <h2>Already have an account?</h2> <button type="button" onClick = {navLogin}>Log In</button>
+            <h2 id="typed-out-h2">Already have an account?</h2><br></br> <button type="button" onClick = {navLogin}>Log In</button>
          </div>
             <form onSubmit = {handleSubmit}>
                <p  id ="pswdCheckText" style ={{color:'red'}}></p>
                <input type="text" value={nameInput} onChange={(e) => setNameInput(e.target.value)} placeholder='Username'></input><br></br><br></br>
                <input type="password" value={pswdInput} onChange={(e) => setPswdInput(e.target.value)} placeholder='Password'></input><br></br><br></br>
                <input type="password" value={doubleCheckPswd} onChange={(e) => setDoubleCheckPswd(e.target.value)} placeholder='Re-Enter Password'></input><br></br><br></br>
-               <button type ="submit"> REGISTER </button>
+               <button type ="submit"> Register </button>
             </form>
       </div>
    

@@ -1,5 +1,5 @@
 .env
 __pycache__/
 .venv/
-
+passwordDatabase.db
 client\node_modules

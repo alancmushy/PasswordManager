@@ -82,7 +82,6 @@ class App():
       except VerifyMismatchError:
          raise HTTPException(status_code=401, detail="Incorrect password")
    
-      return existingUser
                
       
       
@@ -105,9 +104,7 @@ class App():
 
    @staticmethod
    def getMKey(username:str):
-      print(os.path.abspath('.env'))
       load_dotenv(os.path.abspath('.env'))
-      print(username + " hex= ", os.getenv(username))
       mKeydata = os.getenv(username)
       mKey = bytes.fromhex(mKeydata)
       return mKey
@@ -150,6 +147,20 @@ class App():
       plaintext = plaintext.decode()
       return plaintext
 
+   def updatePassword(self,oldPswd:dbData,newPswd:dbData,username:str):
+      connCursor.execute("SELECT wrappedKey FROM usersPasswords WHERE user = ? AND passwordUsername = ? AND passwordWebsite = ?",(username,oldPswd.user_name, oldPswd.website))
+      data = connCursor.fetchone()
+      userKey = data[0]
+      print("User Key " + userKey.hex())
+      unwrappedKey = self.keyUnwrapping(username,userKey)
+      newPswdData = self.encryptPassword(newPswd.plain_password,unwrappedKey,newPswd.website)
+      connCursor.execute("UPDATE usersPasswords SET passwordUsername = ?, passwordWebsite =?, passwordData =? WHERE user = ? AND wrappedKey =?", (newPswd.user_name,newPswd.website,newPswdData,username,userKey))
+      connection.commit()
+      connCursor.execute("SELECT passwordUsername, passwordWebsite, passwordData FROM usersPasswords WHERE user = ? AND wrappedKey =?", (username,userKey))
+      result = connCursor.fetchone()
+      print("result " , str(result))
+      return "updated password: ", str(result)
+   
    #REFACTORED
    def addPassword(self,pswd:dbData, username:str):
       key = self.genEncryptionKey()
@@ -158,17 +169,20 @@ class App():
       connCursor.execute("INSERT INTO usersPasswords (user, passwordUsername, passwordWebsite, passwordData, wrappedKey) VALUES (? ,? , ?, ?, ?)", (username, pswd.user_name, pswd.website, ePassword, wKey))
       connection.commit()
       return username + "'s " + pswd.website + " password successfully added to database"
-      
+   
+   def deletePassword(self,pswd:dbData,username:str):
+      connCursor.execute("DELETE FROM usersPasswords WHERE user = ? AND passwordUsername = ? AND passwordWebsite = ?",(username,pswd.user_name,pswd.website))
+      connection.commit()
+      return "password deleted"
+
    #REFACTORED
    def userPortal(self,loggedIn:str):
       connCursor.execute("SELECT passwordData FROM usersPasswords WHERE user = ?", (loggedIn,))
       passwords = connCursor.fetchall()
       password_list = []
-      print(loggedIn + "'s Passwords:")
       for password in passwords:
          connCursor.execute("SELECT passwordUsername, passwordWebsite, wrappedKey FROM usersPasswords WHERE passwordData = ?", (password[0],))
          result = connCursor.fetchone()
-         print(result)
          username = result[0]
          website = result[1]
          wKey = result[2]

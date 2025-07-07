@@ -13,7 +13,7 @@ const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:str
       try{
          await api.post(`/${username}/append`,{user_name:pswdUsername,plain_password:pswdPlaintext,website:pswdWebsite});
       } catch(error){
-         console.error("Error adding user", error)
+         console.error("Error adding password", error)
    }
    }
 
@@ -21,13 +21,27 @@ const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:str
       navigate(`/${username}/view`)
    };
 
-const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-   event.preventDefault()
-   addPswd(pswdUsername,pswdPlaintext,pswdWebsite)
-   navigate(`/${username}/view`)
-
+   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      addPswd(pswdUsername,pswdPlaintext,pswdWebsite)
+      navigate(`/${username}/view`)
 }
 
+const hideAndShow = () =>{
+   
+   var passwordBox = document.getElementById("passwordForm") as HTMLInputElement;
+   
+    if (!passwordBox) {
+      console.error("Element with ID 'passwordForm' not found.");
+      return;
+   }
+   
+   if(passwordBox.type === "password"){
+      passwordBox.type = "text"
+   }else if (passwordBox.type === "text"){
+      passwordBox.type = "password"
+   }
+}
   return (
    
       <div>
@@ -38,7 +52,9 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
             <form onSubmit = {handleSubmit}>
                <input type="text" value={pswdUsername} onChange={(e) => setpswdUsername(e.target.value)} placeholder='Account Username'></input><br></br><br></br>
                <input type="text" value={pswdWebsite} onChange={(e) => setPswdWebsite(e.target.value)} placeholder='Account Website'></input><br></br><br></br>
-               <input type="password" value={pswdPlaintext} onChange={(e) => setPswdPlaintext(e.target.value)} placeholder='Account Password'></input><br></br><br></br>
+               <input id = "passwordForm" type="password" value={pswdPlaintext} onChange={(e) => setPswdPlaintext(e.target.value)} placeholder='Account Password'></input> <br></br>
+               <img className = "see" src = "/eye.png" onClick={() => hideAndShow()}></img>
+               <br></br><br></br>
                <button type ="submit"> ADD PASSWORD </button>
             </form>
       </div>

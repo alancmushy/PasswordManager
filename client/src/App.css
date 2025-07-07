@@ -6,9 +6,60 @@
   
 }
 
+body{
+  background-color: #888888e0;
+  color:white
+}
+
+.sidebar{
+  height: 100%;
+  width: 225px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #242323d0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+
+.sidebar a {
+  padding: 175px 8px 6px 16px;
+  font-size: 25px;
+  color:chartreuse;
+  display: block;
+  font-family: Consolas, 'Courier New', monospace;
+}
 
 p{
   font-family: Consolas, 'Courier New', monospace;
+}
+
+h1{
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+h2{
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+h3{
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+button{
+  background-color: #1d201a23; ;
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+.button:hover{
+  background-color: chartreuse;
+  transition: 0.7s;
+}
+
+input{
+  font-family: Consolas, 'Courier New', monospace;
+  color:chartreuse
 }
 .logo {
   height: 6em;
@@ -38,13 +89,94 @@ p{
   }
 }
 
-#password-data{
-  background-color:rgba(240, 255, 255, 0.274)
-}
+
 .card {
   padding: 2em;
 }
 
 .read-the-docs {
   color: #888;
+}
+
+#typed-out-h1{
+  animation-duration: 3s;
+  animation-name: slide-in;
+
+}
+
+#typed-out-h2{
+  overflow:hidden;
+  border-right: .15em chartreuse;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: normal;
+  animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+}
+
+#checkAcct{
+  overflow:hidden;
+  border-right: .15em chartreuse;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: normal;
+  animation: 
+    typing 3.5s steps(40, end), 
+    blink-caret .75s step-end infinite;
+}
+.view{
+  display: block;
+  flex-direction: column;
+  align-items: left; 
+  
+}
+
+.removeImg{
+  width:3.5%
+}
+
+.see{
+  width:5%
+}
+
+
+.updateImg{
+  width:3.5%
+}
+.password-data{
+  border: 0.75px solid chartreuse;
+  background-color: #a0a8aa;
+  margin-bottom: 1rem;
+  width:80%;
+  text-align: left;
+  padding-left: 20px;
+  display: block;
+  margin-left:100px;
+  
+}
+.passwords {
+  list-style: none;
+  width:100%;
+  
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: chartreuse; }
+}
+
+@keyframes slide-in {
+  from {
+    translate: 150vw 0;
+    scale: 200% 1;
+  }
+
+  to {
+    translate: 0 0;
+    scale: 100% 1;
+  }
 }

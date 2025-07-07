@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from "react-router-dom";
 import api from '../api';
 
@@ -24,25 +24,57 @@ const View : FC = () =>{
          console.error("Error adding user", error)
       }
    }
+   
+   const navAdd = () => {  
+   navigate(`/${username}/append`)
+   };
 
+   const navUpdate = (pswd:Password)=>{
+      localStorage.setItem("oldPswd",JSON.stringify(pswd))
+      navigate(`/${username}/update`)
+   }
 
+   const remove = async(selectedPswd:Password)=>{
+      try{
+         await api.delete(`/${username}/delete`,{
+            data:selectedPswd,
+            });
+      } catch(error){
+         console.error("Error deleteing password", error)
+      }
+      window.location.reload();
+   }
    useEffect(() => {
     grabPswds();
+    
    }, []);
 
      return (
-      <div>
-         <h1> {username}'s Passwords</h1>
-         <h2>Add more passwords?</h2>
-         <ul>
-            {pswds.map((pswd, index) => (
-               <li key={index}>
-                  <div id ="password-data">      
-                     <p>Username: {pswd.user_name}</p> <p>Website: {pswd.website}</p>  <p >Password: {pswd.plain_password}</p>  
-                  </div>
-               </li>
-            ))}
-        </ul>
+      
+      <div className ="view">
+         <title>View - ARCH</title>
+         <div className="sidebar">
+            <a onClick = {navAdd}>Add</a>
+            <a>LogOut</a>
+         </div>
+         <div>
+            <h1>{username}'s Passwords</h1>
+         </div>
+         <div className="password-div">
+            <ul className="passwords">
+               {pswds.map((pswd, index) => (
+                  <li key={index}>
+                     <div className ="password-data">      
+                        <p>Username: {pswd.user_name}</p> <p>Website: {pswd.website}</p>  <p>Password: {pswd.plain_password}</p> 
+                        <div>
+                           <img className = "removeImg" src = "/garbage.png" onClick={() => remove(pswd)}></img>
+                           <img className = "updateImg" src = "/pencil.png" onClick={() => navUpdate(pswd)}></img>
+                        </div>  
+                     </div>
+                  </li>
+               ))}
+            </ul>
+         </div>
       </div>
    );
        
