@@ -14,11 +14,6 @@ const Update : FC = () =>{
    const [newPswdUsername, setNewPswdUsername] = useState<string>('');
    const [newPswdPlaintext, setNewPswdPlaintext] = useState<string>('')
    const [newPswdWebsite, setNewPswdWebsite] = useState<string>('')
-   const [newPswd, setNewPswd] = useState<Password>({
-                           user_name: "",
-                           plain_password: "",
-                           website: ""
-   });
    const [oldPassword,setOldPassword] = useState<Password>({
                            user_name: "",
                            plain_password: "",
