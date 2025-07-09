@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 sqlalchemy
-python-dotenv
 contextlib
 argon2-cffi
 pycryptodome

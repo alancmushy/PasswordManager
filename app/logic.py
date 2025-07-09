@@ -3,6 +3,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import re
 import os
+import json
 from dotenv import load_dotenv
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -15,6 +16,7 @@ from pydantic import BaseModel
 
 connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
+STORAGE_FILE = "data\majorkeyalert.json"
 
 class User(BaseModel):
    username:str
@@ -45,8 +47,21 @@ class App():
       p=1,
       )
       mKey = kdf.derive(password.encode())
-      with open(".env", "a") as f:
-         f.write(f"{username}={mKey.hex()}\n")
+
+      keys = {}
+
+      if not os.path.exists(STORAGE_FILE):
+         with open(STORAGE_FILE, "w") as f:
+            json.dump(keys,f)
+
+
+      with open(STORAGE_FILE, "r") as f:
+            keys = json.load(f)
+
+      keys[username] = mKey.hex()
+
+      with open(STORAGE_FILE, "w") as f:
+        json.dump(keys, f)
 
 
    #REFACTORED
@@ -104,9 +119,9 @@ class App():
 
    @staticmethod
    def getMKey(username:str):
-      load_dotenv(os.path.abspath('.env'))
-      mKeydata = os.getenv(username)
-      mKey = bytes.fromhex(mKeydata)
+      with open(STORAGE_FILE, "r") as f:
+          keys = json.load(f)
+      mKey = bytes.fromhex(keys[username])
       return mKey
    
    
