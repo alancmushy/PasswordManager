@@ -14,9 +14,9 @@ from pydantic import BaseModel
 
 
 
-connection = sqlite3.connect('data/passwordDatabase.db', check_same_thread=False)
+connection = sqlite3.connect('/data/passwordDatabase.db', check_same_thread=False)
 connCursor = connection.cursor()
-STORAGE_FILE = "data/majorkeyalert.json"
+STORAGE_FILE = "/data/majorkeyalert.json"
 
 class User(BaseModel):
    username:str
