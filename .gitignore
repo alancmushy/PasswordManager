@@ -3,5 +3,3 @@ __pycache__/
 .venv/
 passwordDatabase.db
 client\node_modules
-data/
-data/majorkeyalert.json
