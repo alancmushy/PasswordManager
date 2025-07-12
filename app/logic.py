@@ -4,7 +4,6 @@ from argon2.exceptions import VerifyMismatchError
 import re
 import os
 import json
-from dotenv import load_dotenv
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
