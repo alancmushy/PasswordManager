@@ -1,7 +1,7 @@
 import sqlite3
 def startup():
     
-    connection = sqlite3.connect('data/passwordDatabase.db')
+    connection = sqlite3.connect('/data/passwordDatabase.db')
 
     with open('app/passProtect.sql') as f:
         connection.executescript(f.read())
