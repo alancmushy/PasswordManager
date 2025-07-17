@@ -31,6 +31,12 @@ class App():
 
    hasher = PasswordHasher()
 
+   def __init__(self):
+      self.conn = None
+      self.cursor = None
+      self.conn = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
+      self.connCursor = self.conn.cursor()
+
    @staticmethod
    def genSalt():
       salt = os.urandom(16)
