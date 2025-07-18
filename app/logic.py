@@ -31,12 +31,6 @@ class App():
 
    hasher = PasswordHasher()
 
-   def __init__(self):
-      self.conn = None
-      self.cursor = None
-      self.conn = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
-      self.connCursor = self.conn.cursor()
-
    @staticmethod
    def genSalt():
       salt = os.urandom(16)
@@ -58,6 +52,7 @@ class App():
       if not os.path.exists(STORAGE_FILE):
          with open(STORAGE_FILE, "w") as f:
             json.dump(keys,f)
+            print("majorkeyalert.json loaded successfully")
 
 
       with open(STORAGE_FILE, "r") as f:
