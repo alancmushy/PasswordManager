@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+    baseURL:'https://archlock.onrender.com'
 })
 
 console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
