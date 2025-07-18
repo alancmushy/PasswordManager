@@ -17,11 +17,12 @@ app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
+    "https://archlock.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://archlock.vercel.app"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
