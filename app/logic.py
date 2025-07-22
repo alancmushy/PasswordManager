@@ -1,4 +1,4 @@
-import sqlite3
+import psycopg2
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import re
@@ -10,12 +10,17 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.keywrap import aes_key_wrap, aes_key_unwrap
 from fastapi import *
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
-
-
-connection = sqlite3.connect('passwordDatabase.db', check_same_thread=False)
-connCursor = connection.cursor()
+load_dotenv()
 STORAGE_FILE = "majorkeyalert.json"
+
+
+
+print(os.getenv("DATABASE_URL"))
+connection = psycopg2.connect(os.getenv("DATABASE_URL"))
+connCursor = connection.cursor()
+
 
 class User(BaseModel):
    username:str
@@ -56,7 +61,10 @@ class App():
 
 
       with open(STORAGE_FILE, "r") as f:
+         try:
             keys = json.load(f)
+         except json.JSONDecodeError:
+            keys = {}
 
       keys[username] = mKey.hex()
 
@@ -66,13 +74,13 @@ class App():
 
    #REFACTORED
    def createUser(self, createdUser:User):
-      connCursor.execute("SELECT 1 FROM users WHERE userName = ?", (createdUser.username,))
+      connCursor.execute("SELECT 1 FROM users WHERE userName = %s", (createdUser.username,))
       if connCursor.fetchone():
          raise HTTPException(status_code=401, detail="User already exists")
       
       self.passwordCheck(createdUser.password)
       
-      connCursor.execute("INSERT INTO users (userName, pass_hash) VALUES (?, ?)", (createdUser.username, self.hashPassword(createdUser.password)))
+      connCursor.execute("INSERT INTO users (userName, pass_hash) VALUES (%s, %s)", (createdUser.username, self.hashPassword(createdUser.password)))
       connection.commit()
       
       self.kdfMaster(createdUser.password,createdUser.username)
@@ -85,7 +93,7 @@ class App():
 
    #REFACTORED
    def logIn(self, existingUser:User):
-      connCursor.execute("SELECT pass_hash FROM users WHERE userName = ?", (existingUser.username,))
+      connCursor.execute("SELECT pass_hash FROM users WHERE userName = %s", (existingUser.username,))
       currentUser = connCursor.fetchone()
 
       if not currentUser:
@@ -119,6 +127,8 @@ class App():
 
    @staticmethod
    def getMKey(username:str):
+      if username not in keys:
+         raise HTTPException(status_code=404, detail="Master key not found for user")
       with open(STORAGE_FILE, "r") as f:
           keys = json.load(f)
       mKey = bytes.fromhex(keys[username])
@@ -163,15 +173,15 @@ class App():
       return plaintext
 
    def updatePassword(self,oldPswd:dbData,newPswd:dbData,username:str):
-      connCursor.execute("SELECT wrappedKey FROM usersPasswords WHERE user = ? AND passwordUsername = ? AND passwordWebsite = ?",(username,oldPswd.user_name, oldPswd.website))
+      connCursor.execute("SELECT wrappedKey FROM usersPasswords WHERE masterUsername = %s AND passwordUsername = %s AND passwordWebsite = %s",(username,oldPswd.user_name, oldPswd.website))
       data = connCursor.fetchone()
       userKey = data[0]
       print("User Key " + userKey.hex())
       unwrappedKey = self.keyUnwrapping(username,userKey)
       newPswdData = self.encryptPassword(newPswd.plain_password,unwrappedKey,newPswd.website)
-      connCursor.execute("UPDATE usersPasswords SET passwordUsername = ?, passwordWebsite =?, passwordData =? WHERE user = ? AND wrappedKey =?", (newPswd.user_name,newPswd.website,newPswdData,username,userKey))
+      connCursor.execute("UPDATE usersPasswords SET passwordUsername = %s, passwordWebsite =%s, passwordData =%s WHERE masterUsername = %s AND wrappedKey =%s", (newPswd.user_name,newPswd.website,newPswdData,username,userKey))
       connection.commit()
-      connCursor.execute("SELECT passwordUsername, passwordWebsite, passwordData FROM usersPasswords WHERE user = ? AND wrappedKey =?", (username,userKey))
+      connCursor.execute("SELECT passwordUsername, passwordWebsite, passwordData FROM usersPasswords WHERE masterUsername = %s AND wrappedKey =%s", (username,userKey))
       result = connCursor.fetchone()
       print("result " , str(result))
       return "updated password: ", str(result)
@@ -181,22 +191,22 @@ class App():
       key = self.genEncryptionKey()
       ePassword = self.encryptPassword(pswd.plain_password,key,pswd.website)
       wKey = self.keyWrapping(username, key)
-      connCursor.execute("INSERT INTO usersPasswords (user, passwordUsername, passwordWebsite, passwordData, wrappedKey) VALUES (? ,? , ?, ?, ?)", (username, pswd.user_name, pswd.website, ePassword, wKey))
+      connCursor.execute("INSERT INTO usersPasswords (masterUsername, passwordUsername, passwordWebsite, passwordData, wrappedKey) VALUES (%s ,%s, %s, %s, %s)", (username, pswd.user_name, pswd.website, ePassword, wKey))
       connection.commit()
       return username + "'s " + pswd.website + " password successfully added to database"
    
    def deletePassword(self,pswd:dbData,username:str):
-      connCursor.execute("DELETE FROM usersPasswords WHERE user = ? AND passwordUsername = ? AND passwordWebsite = ?",(username,pswd.user_name,pswd.website))
+      connCursor.execute("DELETE FROM usersPasswords WHERE masterUsername =%s AND passwordUsername = %s AND passwordWebsite = %s",(username,pswd.user_name,pswd.website))
       connection.commit()
       return "password deleted"
 
    #REFACTORED
    def userPortal(self,loggedIn:str):
-      connCursor.execute("SELECT passwordData FROM usersPasswords WHERE user = ?", (loggedIn,))
+      connCursor.execute("SELECT passwordData FROM usersPasswords WHERE masterUsername = %s", (loggedIn,))
       passwords = connCursor.fetchall()
       password_list = []
       for password in passwords:
-         connCursor.execute("SELECT passwordUsername, passwordWebsite, wrappedKey FROM usersPasswords WHERE passwordData = ?", (password[0],))
+         connCursor.execute("SELECT passwordUsername, passwordWebsite, wrappedKey FROM usersPasswords WHERE passwordData = %s", (password[0],))
          result = connCursor.fetchone()
          username = result[0]
          website = result[1]

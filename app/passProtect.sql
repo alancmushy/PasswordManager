@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS users(
-   user_id integer primary key not null, 
-   userName text not NULL, 
-   pass_hash text not NULL
+   user_id SERIAL PRIMARY KEY, 
+   userName TEXT NOT NULL UNIQUE, 
+   pass_hash TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usersPasswords(
-   pass_id integer primary key not null,
-   user text key not null,
-   passwordUsername text not NULL, --username connected to password
-   passwordWebsite text not NULL, --the website associated with the password being stored in the database
-   passwordData BLOB, -- encrypted data that is stored in the database 
-   wrappedKey BLOB --wrapped key
+   pass_id SERIAL PRIMARY KEY,
+   masterUsername TEXT NOT NULL,
+   passwordUsername TEXT NOT NULL, --username connected to password
+   passwordWebsite TEXT NOT NULL, --the website associated with the password being stored in the database
+   passwordData BYTEA, -- encrypted data that is stored in the database 
+   wrappedKey BYTEA --wrapped key
 );
 
