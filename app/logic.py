@@ -10,9 +10,9 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.keywrap import aes_key_wrap, aes_key_unwrap
 from fastapi import *
 from pydantic import BaseModel
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 STORAGE_FILE = "majorkeyalert.json"
 
 
