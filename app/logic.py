@@ -129,7 +129,7 @@ class App():
    def getMKey(username:str):
       with open(STORAGE_FILE, "r") as f:
           keys = json.load(f)
-          
+
       if username not in keys:
          raise HTTPException(status_code=404, detail="Master key not found for user")
       
@@ -214,7 +214,7 @@ class App():
          website = result[1]
          wKey = result[2]
          key = self.keyUnwrapping(loggedIn,wKey)
-         password_data = password[0].split(b'EUREKA')
+         password_data = bytes(password[0]).split(b'EUREKA')
          plainPassword = self.decryptPassword(password_data[0],password_data[1],password_data[2],key,website)
          pswdDetails = dbData(
             user_name=username,
