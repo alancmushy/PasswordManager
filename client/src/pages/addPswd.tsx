@@ -12,7 +12,7 @@ const Append : FC = () =>{
 const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:string) => {
       try{
          await api.post(`/${username}/append`,{user_name:pswdUsername,plain_password:pswdPlaintext,website:pswdWebsite});
-         console.log(`${username} added ${website} password to database`)
+         
       } catch(error){
          console.error("Error adding password", error)
    }
