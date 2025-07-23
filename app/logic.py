@@ -127,10 +127,12 @@ class App():
 
    @staticmethod
    def getMKey(username:str):
-      if username not in keys:
-         raise HTTPException(status_code=404, detail="Master key not found for user")
       with open(STORAGE_FILE, "r") as f:
           keys = json.load(f)
+          
+      if username not in keys:
+         raise HTTPException(status_code=404, detail="Master key not found for user")
+      
       mKey = bytes.fromhex(keys[username])
       return mKey
    
