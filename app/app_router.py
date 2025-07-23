@@ -2,6 +2,7 @@ from fastapi import APIRouter,FastAPI
 from contextlib import *
 from app.logic import *
 from pydantic import BaseModel
+from starlette.requests import Request
 
 router = APIRouter()
 logic = App()
@@ -9,7 +10,6 @@ logic = App()
 class passwordRequest(BaseModel):
    oldPswd: dbData
    newPswd: dbData
-
 
 @router.get("/")
 def root():
