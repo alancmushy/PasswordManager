@@ -1,5 +1,5 @@
 import React, { useEffect, useState, type FC } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from '../api';
 
 
@@ -20,7 +20,7 @@ const Update : FC = () =>{
                            website: ""
    });
    const navigate = useNavigate()
-   const username = localStorage.getItem('username')
+   const {username} = useParams()
    const oldPswd = localStorage.getItem('oldPswd')
    
 
@@ -42,6 +42,7 @@ const Update : FC = () =>{
             await api.post(`/${username}/update`, {oldPswd:oldPassword,newPswd:newPswd,username:username})
          } catch(error){
             console.error("Error adding password", error)
+            navigate("/error")
          }
    }
 
@@ -63,7 +64,7 @@ const Update : FC = () =>{
 
 
       const navView = () => {
-         navigate(`/${username}/view`)
+         navigate(`/${localStorage.getItem("username")}/view`)
       };
 
       const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,7 +75,7 @@ const Update : FC = () =>{
          if(username !=null){
             console.log("New Password")
             updatePswd(oldPassword,updated,username)
-            navigate(`/${username}/view`)
+            navigate(`/${localStorage.getItem("username")}/view`)
          }else{
             console.error("Error")
          }
@@ -83,16 +84,13 @@ const Update : FC = () =>{
    return(
       <div>
          <div>
-            <h1>Add Password to Database</h1>
-            <h2>View Passwords</h2> <button type="button" onClick = {navView}>Log In</button> <br></br><br></br>
+            <h1>Update Password</h1>
+            <h2 id="typed-out-h2">View Passwords</h2> <button type="button" onClick = {navView}>VIEW</button> <br></br><br></br>
          </div>
             <form onSubmit = {handleSubmit}>
-               <p> Previous Username: {oldPassword.user_name}</p>
-               <p> Previous Website: {oldPassword.website}</p>
-               <p> Previous Password: {oldPassword.plain_password}</p>
-               <input type="text" value={newPswdUsername} onChange={(e) => setNewPswdUsername(e.target.value)} placeholder='Enter New Account Username'></input><br></br><br></br>
-               <input type="text" value={newPswdWebsite} onChange={(e) => setNewPswdWebsite(e.target.value)} placeholder='Enter New Account Website'></input><br></br><br></br>
-               <input id = "passwordForm"type="password" value={newPswdPlaintext} onChange={(e) => setNewPswdPlaintext(e.target.value)} placeholder='Enter New Account Password'></input><br></br>
+               <input type="text" value={newPswdUsername} onChange={(e) => setNewPswdUsername(e.target.value)} placeholder={oldPassword.user_name}></input><br></br><br></br>
+               <input type="text" value={newPswdWebsite} onChange={(e) => setNewPswdWebsite(e.target.value)} placeholder={oldPassword.website}></input><br></br><br></br>
+               <input id = "passwordForm"type="password" value={newPswdPlaintext} onChange={(e) => setNewPswdPlaintext(e.target.value)} placeholder={oldPassword.plain_password}></input><br></br>
                <img className = "see" src = "/eye.png" onClick={() => hideAndShow()}></img>
             
                <br></br><br></br>

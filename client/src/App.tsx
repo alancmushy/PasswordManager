@@ -6,6 +6,7 @@ import LogIn from './pages/logIn'
 import Append from './pages/addPswd'
 import View from './pages/view'
 import Update from './pages/update'
+import ErrorPage from './pages/errorpage';
 
 
 const Home: React.FC = () =>{
@@ -34,6 +35,7 @@ const App: React.FC = () => {
          <Route path = "/:username/view"  element = {<View />}  />
          <Route path = "/:username/append" element = {<Append/>}></Route>
          <Route path = "/:username/update" element = {<Update/>}></Route>
+         <Route path = "/error" element ={<ErrorPage/>}></Route>
       </Routes>
    </BrowserRouter>
 

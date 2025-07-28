@@ -1,5 +1,5 @@
 import React, { useState, type FC } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from '../api';
 
 const Append : FC = () =>{
@@ -7,7 +7,7 @@ const Append : FC = () =>{
    const [pswdPlaintext, setPswdPlaintext] = useState<string>('')
    const [pswdWebsite, setPswdWebsite] = useState<string>('')
    const navigate = useNavigate()
-   const username = localStorage.getItem('username')
+   const {username} = useParams()
 
 const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:string) => {
       try{
@@ -19,13 +19,13 @@ const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:str
    }
 
    const navView = () => {
-      navigate(`/${username}/view`)
+      navigate(`/${localStorage.getItem("username")}/view`)
    };
 
    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault()
       addPswd(pswdUsername,pswdPlaintext,pswdWebsite)
-      navigate(`/${username}/view`)
+      navigate(`/${localStorage.getItem("username")}/view`)
 }
 
 const hideAndShow = () =>{
@@ -48,7 +48,7 @@ const hideAndShow = () =>{
       <div>
          <div>
             <h1>Add Password to Database</h1>
-            <h2>View Passwords</h2> <button type="button" onClick = {navView}>Log In</button> <br></br><br></br>
+            <h2 id="typed-out-h2">View Passwords</h2> <button type="button" onClick = {navView}>VIEW</button> <br></br><br></br>
          </div>
             <form onSubmit = {handleSubmit}>
                <input type="text" value={pswdUsername} onChange={(e) => setpswdUsername(e.target.value)} placeholder='Account Username'></input><br></br><br></br>

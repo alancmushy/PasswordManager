@@ -10,11 +10,11 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.keywrap import aes_key_wrap, aes_key_unwrap
 from fastapi import *
 from pydantic import BaseModel
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-#load_dotenv()
+load_dotenv()
 STORAGE_FILE = "majorkeyalert.json"
-
+loggedInUser = ""
 
 
 print(os.getenv("DATABASE_URL"))
@@ -90,6 +90,8 @@ class App():
 
       return createdUser
    
+   def setLoggedInUser(self,username:str):
+      self.loggedInUser = username
 
    #REFACTORED
    def logIn(self, existingUser:User):
@@ -101,12 +103,14 @@ class App():
 
       try:
          if(self.hasher.verify(currentUser[0],existingUser.password)):
+            self.setLoggedInUser(existingUser.username)
             return existingUser
       except VerifyMismatchError:
          raise HTTPException(status_code=401, detail="Incorrect password")
    
-               
-      
+   def getLoggedInUser(self):
+      return self.loggedInUser
+   
       
    #REFACTORED
    def passwordCheck(self,pswd:str):
@@ -149,6 +153,8 @@ class App():
 
  
    def keyUnwrapping(self,username:str,wKey:bytes):
+      print(f"Wrapped key (wKey) length: {len(wKey)}")
+      print(f"Wrapped key (wKey) bytes: {wKey}")
       master = self.getMKey(username)
       key = aes_key_unwrap(master,wKey)
       return key
