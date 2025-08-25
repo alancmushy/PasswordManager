@@ -14,6 +14,7 @@ const Home: React.FC = () =>{
 
    return (
       <div>
+         <img src="\Lock_icon.png" width="60" height="60"></img>
          <h1 id = "typed-out-h1">Welcome To Archlock</h1><br></br>
          <h2 id = "typed-out-h2">Your go-to, no-nonsense, secure password manager</h2><br></br><br></br>
          <button onClick = {()=> navigate("/register")}> Register </button><br></br><br></br>

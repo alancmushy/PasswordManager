@@ -8,6 +8,7 @@
 
 body{
   background-color: #888888e0;
+  background-image: linear-gradient(to right, #888888e0 , black);
   color:white
 }
 
@@ -32,19 +33,19 @@ body{
 }
 
 p{
-  font-family: Consolas, 'Courier New', monospace;
+  font-family: 'Montserrat', sans-serif;
 }
 
 h1{
-  font-family: Consolas, 'Courier New', monospace;
+   font-family: 'Montserrat', sans-serif;
 }
 
 h2{
-  font-family: Consolas, 'Courier New', monospace;
+  font-family: 'Montserrat', sans-serif;
 }
 
 h3{
-  font-family: Consolas, 'Courier New', monospace;
+  font-family: 'Montserrat', sans-serif;
 }
 
 button{
@@ -110,7 +111,7 @@ input{
   white-space: nowrap;
   margin: 0 auto;
   letter-spacing: normal;
-  animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+  animation: typing 2.5s steps(40, end), blink-caret .75s step-end infinite;
 }
 
 #checkAcct{
