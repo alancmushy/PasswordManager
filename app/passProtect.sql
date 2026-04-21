@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS users(
    user_id SERIAL PRIMARY KEY, 
    userName TEXT NOT NULL UNIQUE, 
-   pass_hash TEXT NOT NULL
+   pass_hash TEXT NOT NULL, 
+   kdf_salt BYTEA NOT NULL,
+   refresh_token TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usersPasswords(

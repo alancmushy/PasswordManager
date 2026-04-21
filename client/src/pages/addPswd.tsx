@@ -11,7 +11,8 @@ const Append : FC = () =>{
 
 const addPswd = async(pswdUsername:string, pswdPlaintext:string, pswdWebsite:string) => {
       try{
-         await api.post(`/${username}/append`,{user_name:pswdUsername,plain_password:pswdPlaintext,website:pswdWebsite});
+         const token = localStorage.getItem('access_token')
+         await api.post(`/${username}/append`,{user_name:pswdUsername,plain_password:pswdPlaintext,website:pswdWebsite},{headers: {Authorization: `Bearer ${token}`}});
          
       } catch(error){
          console.error("Error adding password", error)

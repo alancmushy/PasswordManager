@@ -11,8 +11,10 @@ const LogIn : FC = () =>{
 
    const loginUser = async(nameInput:string, pswdInput:string) => {
    try{
-      await api.post('/login',{username:nameInput,password:pswdInput});
+      const response = await api.post('/login', {username: nameInput, password: pswdInput})
       localStorage.setItem('username', nameInput)
+      localStorage.setItem('access_token', response.data.access_token)
+      localStorage.setItem('refresh_token', response.data.refresh_token)
       navigate(`/${nameInput}/view`)
    } catch(error){
       document.getElementById("pswdCheckText")!.innerHTML = "Password or Username invalid! Try again.";

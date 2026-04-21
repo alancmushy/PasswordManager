@@ -14,17 +14,21 @@ const View : FC = () =>{
    const navigate = useNavigate()
    const {username} = useParams()
 
-   const grabPswds = async () => {
-      try{
-         const response = await api.get(`${username}/view`);
-         console.log("Fetched data:", response.data);
-         setPswds(response.data)
-      } 
-      catch(error){
-         console.error("Error grabbing passwords", error)
-         navigate("/error")
-      }
-   }
+const grabPswds = async () => {
+    try {
+        const token = localStorage.getItem('access_token')
+        const response = await api.get(`${username}/view`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log("Fetched data:", response.data)
+        setPswds(response.data)
+    } catch(error) {
+        console.error("Error grabbing passwords", error)
+        navigate("/error")
+    }
+}
    
    const navAdd = () => {  
    navigate(`/${username}/append`)
